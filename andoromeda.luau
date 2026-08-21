@@ -266,7 +266,7 @@ runS.Heartbeat:Connect(function()
         else
             desyncPos = (targetRoot.CFrame * CFrame.new(0, 1, 2)).Position
         end
-        desyncCF = CFrame.lookAt(desyncPos, targetHead.Position) * CFrame.Angles(math.rad(-90), 0, 0)
+        desyncCF = CFrame.lookAt(desyncPos, targetHead.Position) * CFrame.Angles(math.rad(90), 0, 0)
     else
         -- VoidSpam: ランダムな超遠距離にTP
         local randomDir = Vector3.new(
