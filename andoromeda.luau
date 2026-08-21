@@ -159,16 +159,25 @@ runS.Heartbeat:Connect(function()
     if FighterController and FighterController.LocalFighter then
         item = FighterController.LocalFighter.EquippedItem
         if item then
-            isReloading = (type(item._reloading) == "boolean" and item._reloading)
-                or (type(item._is_reloading) == "boolean" and item._is_reloading)
-                or (item.Reloading == true)
+            pcall(function()
+                isReloading = item:IsAnimationPlaying("Reload")
+                    or item:IsAnimationPlaying("EmptyReload")
+                    or (item:Get("Ammo") == 0)
+                    or (tick() < (item._reload_cooldown or 0))
+            end)
         end
     end
 
     local targetPlayer, targetRoot, targetHead = getClosestTarget()
 
-    local myFF    = lplr.Character:FindFirstChildOfClass("ForceField") ~= nil
-    local targetFF = (targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChildOfClass("ForceField")) ~= nil
+    local myFF = false
+    local targetFF = false
+    if lplr.Character then
+        myFF = lplr.Character:FindFirstChildOfClass("ForceField") ~= nil
+    end
+    if targetPlayer and targetPlayer.Character then
+        targetFF = targetPlayer.Character:FindFirstChildOfClass("ForceField") ~= nil
+    end
 
     -- AttackModeの条件を全て満たす場合のみAttack、それ以外はVoidSpam
     local canAttack = getgenv().Config.Enabled
