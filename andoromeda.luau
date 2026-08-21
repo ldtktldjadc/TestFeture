@@ -44,6 +44,55 @@ local function getSlotNumber()
 end
 
 task.spawn(function()
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "WeaponSelectorUI"
+    sg.ResetOnSpawn = false
+    local success, err = pcall(function()
+        sg.Parent = game:GetService("CoreGui")
+    end)
+    if not success then
+        sg.Parent = lp:WaitForChild("PlayerGui")
+    end
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 150, 0, 100)
+    frame.Position = UDim2.new(0.85, 0, 0.5, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = sg
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 20)
+    title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Text = "Weapon Slot"
+    title.TextSize = 14
+    title.BorderSizePixel = 0
+    title.Parent = frame
+
+    local yPos = 25
+    for _, slotName in ipairs({"Primary", "Secondary", "Melee"}) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 20)
+        btn.Position = UDim2.new(0, 5, 0, yPos)
+        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = slotName
+        btn.TextSize = 14
+        btn.BorderSizePixel = 0
+        btn.Parent = frame
+        
+        btn.MouseButton1Click:Connect(function()
+            getgenv().Config.WeaponSlot = slotName
+        end)
+        
+        yPos = yPos + 25
+    end
+end)
+
+task.spawn(function()
     local localFighter = FighterController.LocalFighter
     while not localFighter do
         task.wait(0.1)
