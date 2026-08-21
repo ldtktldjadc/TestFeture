@@ -1,4 +1,3 @@
-local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local PlayerGui = lp:WaitForChild("PlayerGui")
@@ -43,8 +42,6 @@ local function getSlotNumber()
     return slots[getgenv().Config.WeaponSlot] or 3
 end
 
-local currentDesiredSlot = getSlotNumber()
-
 task.spawn(function()
     local localFighter = FighterController.LocalFighter
     while not localFighter do
@@ -52,8 +49,21 @@ task.spawn(function()
         localFighter = FighterController.LocalFighter
     end
     pcall(function()
-        localFighter:EquipItem(currentDesiredSlot)
+        localFighter:EquipItem(getSlotNumber())
     end)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if not getgenv().Config.Enabled then continue end
+        local localFighter = FighterController.LocalFighter
+        if localFighter then
+            pcall(function()
+                localFighter:EquipItem(getSlotNumber())
+            end)
+        end
+    end
 end)
 
 local lastFire = 0
@@ -168,23 +178,6 @@ runS.Heartbeat:Connect(function()
 
     local targetPlayer, targetRoot, targetHead = getClosestTarget()
 
-    if getgenv().Config.Enabled then
-        local targetSlot = getSlotNumber()
-        if targetRoot then
-            local hVel = Vector3.new(targetRoot.Velocity.X, 0, targetRoot.Velocity.Z)
-            if hVel.Magnitude < 2 then
-                targetSlot = 3
-            end
-        end
-        if currentDesiredSlot ~= targetSlot then
-            currentDesiredSlot = targetSlot
-            local lf = FighterController and FighterController.LocalFighter
-            if lf then
-                pcall(function() lf:EquipItem(targetSlot) end)
-            end
-        end
-    end
-
     local myFF = false
     local targetFF = false
     -- Rivalsの無敵判定はEntity:Get("IsInvincible")
@@ -223,7 +216,6 @@ runS.Heartbeat:Connect(function()
         else
             desyncPos = (targetRoot.CFrame * CFrame.new(0, 1, 2)).Position
         end
-        -- 撃つときに仰向け（上向き）になるように角度を-90度回転
         desyncCF = CFrame.lookAt(desyncPos, targetHead.Position) * CFrame.Angles(math.rad(-90), 0, 0)
     else
         -- VoidSpam: ランダムな超遠距離にTP
