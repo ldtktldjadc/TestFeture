@@ -176,7 +176,8 @@ local function getClosestTarget()
         local pChar = player.Character
         if not pChar then continue end
         local pRoot = pChar:FindFirstChild("HumanoidRootPart")
-        local pHead = pChar:FindFirstChild("Head")
+        -- HitboxHead を優先、なければ Head
+        local pHead = pChar:FindFirstChild("HitboxHead") or pChar:FindFirstChild("Head")
         local pHum = pChar:FindFirstChildWhichIsA("Humanoid")
         if not (pRoot and pHead and pHum and pHum.Health > 0) then continue end
         local dist = (myRoot.Position - pRoot.Position).Magnitude
@@ -259,14 +260,14 @@ runS.Heartbeat:Connect(function()
 
     local desyncCF
     if canAttack then
-        -- AttackMode: ターゲットの後ろにTP
-        local desyncPos
-        if hasKnifeViewModel(targetPlayer) then
-            desyncPos = (targetRoot.CFrame * CFrame.new(0, 6, 0)).Position
-        else
-            desyncPos = (targetRoot.CFrame * CFrame.new(0, 1, 2)).Position
-        end
-        desyncCF = CFrame.lookAt(desyncPos, targetHead.Position) * CFrame.Angles(math.rad(90), 0, 0)
+        -- AttackMode: ターゲットのLowerTorsoの5スタッド上にTP
+        local targetLowerTorso = targetPlayer.Character and targetPlayer.Character:FindFirstChild("LowerTorso")
+        local baseCFrame = targetLowerTorso and targetLowerTorso.CFrame or targetRoot.CFrame
+        
+        local desyncPos = (baseCFrame * CFrame.new(0, 5, 0)).Position
+        
+        -- ターゲットの真上から見下ろすことで、自然と「うつ伏せ」で銃を下に向ける姿勢になる
+        desyncCF = CFrame.lookAt(desyncPos, targetHead.Position)
     else
         -- VoidSpam: ランダムな超遠距離にTP
         local randomDir = Vector3.new(
