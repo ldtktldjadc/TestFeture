@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local PlayerGui = lp:WaitForChild("PlayerGui")
