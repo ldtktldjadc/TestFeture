@@ -160,10 +160,10 @@ runS.Heartbeat:Connect(function()
         item = FighterController.LocalFighter.EquippedItem
         if item then
             pcall(function()
-                isReloading = item:IsAnimationPlaying("Reload")
-                    or item:IsAnimationPlaying("EmptyReload")
-                    or (item:Get("Ammo") == 0)
-                    or (tick() < (item._reload_cooldown or 0))
+                local ammo = item:Get("Ammo")
+                local reloadCD = item._reload_cooldown or 0
+                isReloading = (tick() < reloadCD)
+                    or (type(ammo) == "number" and ammo <= 0)
             end)
         end
     end
@@ -172,11 +172,20 @@ runS.Heartbeat:Connect(function()
 
     local myFF = false
     local targetFF = false
-    if lplr.Character then
-        myFF = lplr.Character:FindFirstChildOfClass("ForceField") ~= nil
-    end
-    if targetPlayer and targetPlayer.Character then
-        targetFF = targetPlayer.Character:FindFirstChildOfClass("ForceField") ~= nil
+    -- Rivalsの無敵判定はEntity:Get("IsInvincible")
+    pcall(function()
+        local lf = FighterController and FighterController.LocalFighter
+        if lf and lf.Entity then
+            myFF = lf.Entity:Get("IsInvincible") == true
+        end
+    end)
+    if targetPlayer then
+        pcall(function()
+            local fighter = FighterController:GetFighter(targetPlayer)
+            if fighter and fighter.Entity then
+                targetFF = fighter.Entity:Get("IsInvincible") == true
+            end
+        end)
     end
 
     -- AttackModeの条件を全て満たす場合のみAttack、それ以外はVoidSpam
